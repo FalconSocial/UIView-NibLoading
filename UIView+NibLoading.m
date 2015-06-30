@@ -57,9 +57,9 @@ static char kUIViewNibLoading_outletsKey;
         }
     }
     NSAssert(containerView!=nil, @"UIView+NibLoading : There is no container UIView found at the root of nib %@.",nibName);
-    
+
     [containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
-    
+
     if(CGRectEqualToRect(self.bounds, CGRectZero))
     {
         // `self` has no size : use the containerView's size, from the nib file
@@ -70,49 +70,13 @@ static char kUIViewNibLoading_outletsKey;
         // `self` has a specific size : resize the containerView to this size, so that the subviews are autoresized.
         containerView.bounds = self.bounds;
     }
-    
-    // Save constraints for later
-    NSArray * constraints = containerView.constraints;
-    
-    // reparent the subviews from the nib file
-    for (UIView * view in containerView.subviews)
-    {
-        [self addSubview:view];
-    }
-    
-    // Recreate constraints, replace containerView with self
-    for (NSLayoutConstraint *oldConstraint in constraints)
-    {
-        id firstItem = oldConstraint.firstItem;
-        id secondItem = oldConstraint.secondItem;
-        if (firstItem == containerView)
-        {
-            firstItem = self;
-        }
-        if (secondItem == containerView)
-        {
-            secondItem = self;
-        }
-        
-        NSLayoutConstraint * newConstraint = [NSLayoutConstraint constraintWithItem:firstItem
-                                                                          attribute:oldConstraint.firstAttribute
-                                                                          relatedBy:oldConstraint.relation
-                                                                             toItem:secondItem
-                                                                          attribute:oldConstraint.secondAttribute
-                                                                         multiplier:oldConstraint.multiplier
-                                                                           constant:oldConstraint.constant];
-        [self addConstraint:newConstraint];
-        
-        // If there was outlet(s) to the old constraint, replace it with the new constraint.
-        for (NSString * key in outlets)
-        {
-            if (outlets[key]==oldConstraint)
-            {
-                NSAssert([self valueForKey:key]==oldConstraint, @"UIView+NibLoading : Unexpected value for outlet %@ of view %@. Expected %@, found %@.", key, self, oldConstraint, [self valueForKey:key]);
-                [self setValue:newConstraint forKey:key];
-            }
-        }
-    }
+
+    containerView.backgroundColor = [UIColor clearColor];
+
+    [self addSubview:containerView];
+    NSDictionary *containerViews = @{@"container": containerView};
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[container]|" options:0 metrics:nil views:containerViews]];
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[container]|" options:0 metrics:nil views:containerViews]];
 }
 
 - (void) setValue:(id)value forKey:(NSString *)key
