@@ -8,6 +8,7 @@
 
 #import "UIView+NibLoading.h"
 
+IB_DESIGNABLE
 @interface ColorView : NibLoadedView
-@property (nonatomic) UIColor * color;
+@property (nonatomic) IBInspectable UIColor * color;
 @end
